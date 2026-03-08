@@ -2,6 +2,7 @@ from PIL import Image
 from PIL.ExifTags import TAGS
 from pathlib import Path
 import os
+from pathlib import Path
 
 """
 extractor.py - שליפת EXIF מתמונות
@@ -95,4 +96,10 @@ def extract_all(folder_path):
     Returns:
         list של dicts (כמו extract_metadata)
     """
-    pass
+    data_list = []
+    fol_path = Path(folder_path)
+    for image_path in fol_path.glob("*jpg"):
+        data_list.append(extract_metadata(image_path))
+    if len(data_list) == 0:
+        return 'no images in folder'
+    return data_list
