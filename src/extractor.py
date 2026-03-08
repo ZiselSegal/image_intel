@@ -23,7 +23,7 @@ def latitude(data: dict):
 def longitude(data: dict):
     pass
 
-def datetime(data: dict):
+def datatime(data: dict):
     return data.get('DateTime',None)
 
 
@@ -101,4 +101,3 @@ def extract_all(folder_path):
     if len(data_list) == 0:
         return 'no images in folder'
     return data_list
-print(extract_all(r"C:\Users\Zisel Segal\PyCharmMiscProject\image_intel\images\ready"))
