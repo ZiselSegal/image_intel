@@ -24,7 +24,7 @@ def longitude(data: dict):
     pass
 
 def datatime(data: dict):
-    return data.get('DateTime',None)
+    return data.get('DateTime')
 
 
 def camera_make(data: dict):
