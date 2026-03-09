@@ -16,7 +16,7 @@ def has_gps(data: dict):
     בודק האם קיים מידע GPS במילון הנתונים.
     """
     # בודקים אם קיים המפתח GPSInfo ואם הוא מכיל נתונים
-    return "GPSInfo" in data and bool(data["GPSInfo"])
+    return data.get("latitude") is not None and data.get("longitude") is not None
 
 def latitude(data: dict):
     """
