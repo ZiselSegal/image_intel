@@ -52,29 +52,29 @@ def create_map(images_data):
         "Oppo": "cadetblue"
     }
 
-    # נקודות לקו
-    line_points = []
+    # חלוקה לפי עם/בלי Timeline
+    with_time = [img for img in gps_images if img.get("datetime")]
+    without_time = [img for img in gps_images if not img.get("datetime")]
 
+    # יוצרים את כל הנקודות
     for img in gps_images:
-        color = device_colors.get(img["camera_make"], "gray")
+            color = device_colors.get(img.get("camera_make"), "gray")
+            popup_text = f"{img.get('filename', '')}<br>{img.get('datetime', '')}<br>{img.get('camera_model', '')}"
 
-        folium.Marker(
-            location=[img["latitude"], img["longitude"]],
-            popup=f"{img['filename']}<br>{img['datetime']}<br>{img['camera_model']}",
-            icon=folium.Icon(color=color)
-        ).add_to(m)
+            folium.Marker(
+                location=[img["latitude"], img["longitude"]],
+                popup=popup_text,
+                icon=folium.Icon(color=color)
+            ).add_to(m)
 
-    # סדר כרונולוגי
-    sorted_images = sort_by_time(gps_images)
+    # מוסיפים PolyLine רק אם יש יותר מנקודה אחת עם Timeline
+    if len(with_time) > 1:
+            sorted_images = sort_by_time(with_time)  # משתמש בפונקציה הקיימת שלך
+            line_points = [[img["latitude"], img["longitude"]] for img in sorted_images]
 
-    for img in sorted_images:
-        line_points.append([img["latitude"], img["longitude"]])
-
-    # קו שמחבר את הנקודות
-    folium.PolyLine(line_points, color="purple").add_to(m)
+            folium.PolyLine(line_points, color="purple").add_to(m)
 
     return m._repr_html_()
-
 
 
 if __name__ == "__main__":
