@@ -16,17 +16,17 @@ def create_timeline(images_data_list):
                 margin-bottom: 20px; 
                 padding: 15px; 
                 border-radius: 8px; 
-                box-shadow: 0 2px 10px rgba(0,0,0,0.1); 
+                box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                color: #333; 
             }}
             .map-btn {{ 
-                color: white; 
+                color: white !important; 
                 background: #28a745; 
                 padding: 5px 10px; 
                 text-decoration: none; 
                 border-radius: 4px; 
             }}
         </style>
-        <h2 style="text-align: center;">Activity Timeline</h2>
         <div class="timeline-container">
     """
 
@@ -56,4 +56,7 @@ def create_timeline(images_data_list):
             # סגירה סופית של ה-event-card
             cards_html += "</div>"
 
-    return html_start + cards_html
+    html_end = """
+        </div> </div> """
+
+    return html_start + cards_html + html_end
