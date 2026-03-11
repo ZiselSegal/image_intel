@@ -2,9 +2,9 @@
 <html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <!-- תיקון: היה initial-width=1.0 במקום initial-scale=1.0 -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Image Intel - מודיעין חזותי</title>
+
     <style>
         :root {
             --bg-color: #0f172a;
@@ -50,35 +50,26 @@
             margin-bottom: 40px;
         }
 
-        .file-drop-area {
+        .folder-input-area {
             border: 2px dashed var(--border-color);
             border-radius: 12px;
-            padding: 50px 20px;
+            padding: 30px;
             margin-bottom: 25px;
-            transition: all 0.3s ease;
-            background-color: rgba(255, 255, 255, 0.02);
-            cursor: pointer;
+            background-color: rgba(255,255,255,0.02);
         }
 
-        .file-drop-area:hover, .file-drop-area.dragover {
-            border-color: var(--accent-color);
-            background-color: rgba(56, 189, 248, 0.08);
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background: #0f172a;
+            color: white;
+            font-size: 1em;
         }
 
-        .file-msg {
-            font-size: 1.2em;
-            color: #cbd5e1;
-            display: block;
-            margin-bottom: 10px;
-        }
-
-        .file-msg-sub {
-            font-size: 0.9em;
+        input[type="text"]::placeholder {
             color: #64748b;
-        }
-
-        input[type="file"] {
-            display: none;
         }
 
         .submit-btn {
@@ -103,86 +94,36 @@
         }
     </style>
 </head>
+
 <body>
-    <div class="container">
-        <h1>Image Intel</h1>
-        <p>מערכת סריקה וניתוח נתוני EXIF</p>
 
-        <form action="/analyze" method="POST" enctype="multipart/form-data">
-            <div class="file-drop-area" id="drop-area">
-                <span class="file-msg" id="file-msg">לחץ כאן או גרור תמונות לכאן</span>
-                <span class="file-msg-sub" id="file-msg-sub">אפשר לבחור כמה תמונות יחד</span>
-                <input type="file" name="photos" id="file-input" multiple accept="image/*">
-            </div>
+<div class="container">
 
-            <button type="submit" class="submit-btn">התחל ניתוח מודיעיני</button>
-        </form>
-    </div>
+<h1>Image Intel</h1>
 
-    <script>
-    const dropArea = document.getElementById('drop-area');
-    const fileInput = document.getElementById('file-input');
-    const fileMsg = document.getElementById('file-msg');
-    const fileMsgSub = document.getElementById('file-msg-sub');
+<p>מערכת סריקה וניתוח נתוני EXIF</p>
 
-    const filesMap = new Map();
+<form action="/analyze" method="POST">
 
-    dropArea.addEventListener('click', () => fileInput.click());
+<div class="folder-input-area">
 
-    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-        dropArea.addEventListener(eventName, preventDefaults, false);
-    });
+<p>הזן נתיב לתיקיית התמונות</p>
 
-    function preventDefaults(e) {
-        e.preventDefault();
-        e.stopPropagation();
-    }
+<input
+type="text"
+name="folder_path"
+placeholder="לדוגמה: C:\Users\Moty\Pictures"
+required>
 
-    ['dragenter', 'dragover'].forEach(eventName => {
-        dropArea.addEventListener(eventName, () => dropArea.classList.add('dragover'), false);
-    });
-    ['dragleave', 'drop'].forEach(eventName => {
-        dropArea.addEventListener(eventName, () => dropArea.classList.remove('dragover'), false);
-    });
+</div>
 
-    function addFilesToList(newFiles) {
-        for (let i = 0; i < newFiles.length; i++) {
-            const file = newFiles[i];
-            filesMap.set(file.name, file);
-        }
+<button type="submit" class="submit-btn">
+התחל ניתוח מודיעיני
+</button>
 
-        const dt = new DataTransfer();
-        filesMap.forEach((file) => {
-            dt.items.add(file);
-        });
+</form>
 
-        fileInput.files = dt.files;
-        updateFileName();
-    }
+</div>
 
-    dropArea.addEventListener('drop', (e) => {
-        addFilesToList(e.dataTransfer.files);
-    });
-
-    fileInput.addEventListener('change', (e) => {
-        const selectedFiles = e.target.files;
-        if (selectedFiles.length > 0) {
-            addFilesToList(selectedFiles);
-        }
-    });
-
-    function updateFileName() {
-        const totalFiles = fileInput.files.length;
-        if (totalFiles > 0) {
-            fileMsg.textContent = "נצברו " + totalFiles + " תמונות";
-            fileMsg.style.color = "var(--accent-color)";
-            fileMsgSub.textContent = "אפשר להמשיך להוסיף, תמונות זהות הוחלפו אוטומטית";
-        } else {
-            fileMsg.textContent = "לחץ כאן או גרור תמונות לכאן";
-            fileMsg.style.color = "#cbd5e1";
-            fileMsgSub.textContent = "אפשר לבחור כמה תמונות יחד";
-        }
-    }
-    </script>
 </body>
 </html>
