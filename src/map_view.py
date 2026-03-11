@@ -34,7 +34,15 @@ def create_map(images_data):
     gps_images = [img for img in images_data if img.get("has_gps")]
 
     if not gps_images:
-        return "<h2>No GPS data found</h2>"
+        return """
+        <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; 
+                    height: 500px; color: white; background: rgba(255, 255, 255, 0.03); 
+                    border-radius: 15px; text-align: center; border: 1px dashed rgba(255,255,255,0.1);">
+            <div style="font-size: 60px; margin-bottom: 20px; opacity: 0.5;">📍</div>
+            <h2 style="font-size: 36px; margin: 0; font-weight: bold; letter-spacing: 1px;">No GPS Data Found</h2>
+            <p style="font-size: 18px; opacity: 0.6; margin-top: 10px;">האנלייזר לא מצא מידע גאוגרפי בתמונות שנסרקו.</p>
+        </div>
+        """
 
     center_lat = sum(img["latitude"] for img in gps_images) / len(gps_images)
     center_lon = sum(img["longitude"] for img in gps_images) / len(gps_images)
