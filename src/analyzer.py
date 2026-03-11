@@ -5,13 +5,17 @@ from datetime import datetime, timedelta
 
 geolocator = Nominatim(user_agent="zone_cluster")
 
-def num_of_items(images_data: list[dict]):
-    return len(images_data)
-
-def item_with_gps_num(images_data: list[dict]):
+def items_with_gps_num(images_data: list[dict]):
     result = 0
     for image in images_data:
         if image["has_gps"]:
+            result += 1
+    return result
+
+def items_with_datetime(images_data):
+    result = 0
+    for image in images_data:
+        if image["datetime"]:
             result += 1
     return result
 
@@ -21,14 +25,14 @@ def repeated_locations(images_data):
         locations.append(image["latitude"], image["longitude"])
     pass # צריך לסיים את הפונקציה
 
-def list_of_cameras(images_data: list[dict]):
+def list_of_cameras(images_data):
     cameras = set()
     for image in images_data:
         if image["camera_make"] and image["camera_model"]:
             cameras.add(f"{image["camera_make"]} {image["camera_model"]}")
     return list(cameras)
 
-def date_range_check(images_data: list[dict]):
+def date_range_check(images_data):
     dates = []
     data_range = {}
     for image in images_data:
@@ -139,7 +143,10 @@ def cluster_locations(locations: list[tuple], radius_km=1.0) -> dict:
         result[zone_key] = zone_data
 
     return result 
-    
+
+def images_insights(images_data):
+    pass
+
 def analyze(images_data: list[dict]) -> dict:
     """
     Analyze the data and extracts insights
@@ -150,4 +157,13 @@ def analyze(images_data: list[dict]) -> dict:
     return:
         list of insights
     """
-    pass
+    result = {}
+    
+    if images_data:
+        result["total_images"] = len(images_data)
+        result["images_with_gps"] = items_with_gps_num(images_data)
+        result["images_with_datetime"] = items_with_datetime(images_data)
+        result["unique_cameras"] = list_of_cameras(images_data)
+        result["date_range"] = date_range_check(images_data)
+        return result
+        # צריך להוסיף מסקנות נוספות
