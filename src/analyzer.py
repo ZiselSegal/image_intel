@@ -1,6 +1,7 @@
 import extractor
 from geopy.distance import geodesic
 from geopy.geocoders import Nominatim
+from datetime import datetime, timedelta
 
 geolocator = Nominatim(user_agent="zone_cluster")
 
@@ -13,6 +14,12 @@ def item_with_gps_num(images_data: list[dict]):
         if image["has_gps"]:
             result += 1
     return result
+
+def repeated_locations(images_data):
+    locations = []
+    for image in images_data:
+        locations.append(image["latitude"], image["longitude"])
+    pass # צריך לסיים את הפונקציה
 
 def list_of_cameras(images_data: list[dict]):
     cameras = set()
@@ -31,7 +38,20 @@ def date_range_check(images_data: list[dict]):
     data_range["end"] = max(dates)
     
     return data_range
+
+def time_gaps_between_pics(images_data, min_gap=12):
+    dates = [datetime.strptime(image["datetime"], "%Y-%m-%d %H-%M-%S") for image in images_data]
+    large_gaps = []
     
+    for i in range(len(dates)-1):
+        diff = dates[i+1] - dates[i]
+        if diff >= timedelta(hours=min_gap):
+            large_gaps.append({
+                "from": images_data[i],
+                "to": images_data[i+1],
+                "hours_diff": diff.total_seconds() / 3600 # הפרש הזמן בשעות
+            })
+        
 def detect_camera_switches(images_data):
     sorted_images = sorted(
         [img for img in images_data if img["datetime"]],
@@ -51,7 +71,7 @@ def detect_camera_switches(images_data):
 
 def get_zone_name(lat, lon) -> str:
     try:
-        location = geolocator.reverse(f"{lat}, {lon}", language="en")
+        location = geolocator.reverse(f"{lat}, {lon}", language="he")
         address = location.raw["address"]
         return (
             address.get("city") or
@@ -112,15 +132,14 @@ def cluster_locations(locations: list[tuple], radius_km=1.0) -> dict:
     for cluster in clusters:
         center_lat = sum(l["lat"] for l in cluster) / len(cluster)
         center_lon = sum(l["lon"] for l in cluster) / len(cluster)
-        zone_key = get_zone_name(center_lat, center_lon)  # ← השינוי היחיד
+        zone_key = get_zone_name(center_lat, center_lon)  
 
         zone_data = {loc["id"]: (loc["lat"], loc["lon"]) for loc in cluster}
         zone_data["location_count"] = len(cluster)
         result[zone_key] = zone_data
 
     return result 
-
-
+    
 def analyze(images_data: list[dict]) -> dict:
     """
     Analyze the data and extracts insights
