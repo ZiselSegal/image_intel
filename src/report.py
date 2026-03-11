@@ -1,11 +1,6 @@
-from map_view import create_map
 from datetime import datetime
-from extractor import extract_all
-from map_view import sort_by_time
-from timeline import create_timeline
-import os
-images_data = extract_all("../images/ready")
-def create_report(images_data, map_html, timeline_html, analysis):
+
+def create_report(map_html, timeline_html, analysis):
   
     now = datetime.now().strftime("%d/%m/%Y %H:%M")
     
@@ -188,29 +183,3 @@ def create_report(images_data, map_html, timeline_html, analysis):
     """
     return html
 
-# --- בלוק הבדיקה שלך ---
-if __name__ == "__main__":
-    test_analysis = {
-        "total_images": 15,
-        "images_with_gps": 8,
-        "unique_cameras": ["iPhone 15 Pro", "Samsung Galaxy S23"],
-        "date_range": {"start": "10/03/2026", "end": "11/03/2026"},
-        "insights": [
-            "זוהה ריכוז פעילות חריג באזור תל אביב",
-            "החשוד השתמש בשני מכשירים שונים",
-            "רוב התמונות צולמו בשעות הלילה"
-        ]
-    }
-    
-    test_map = create_map(images_data)
-    test_timeline = create_timeline(sort_by_time(images_data))
-
-    print("מייצר דוח לבדיקה...")
-    full_report_html = create_report([], test_map, test_timeline, test_analysis)
-
-    with open("test_report.html", "w", encoding="utf-8") as f:
-        f.write(full_report_html)
-    
-    print("הבדיקה הסתיימה!")
-    print("הקובץ נמצא בנתיב המלא הבא:")
-    print(os.path.abspath("test_report.html"))
