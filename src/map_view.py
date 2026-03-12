@@ -1,19 +1,22 @@
-"""
-map_view.py - יצירת מפה אינטראקטיבית
-צוות 1, זוג B
-
-ראו docs/api_contract.md לפורמט הקלט והפלט.
-
-=== תיקונים ===
-1. חישוב מרכז המפה - היה עובר על images_data (כולל תמונות בלי GPS) במקום gps_image, נופל עם None
-2. הסרת CustomIcon שלא עובד (filename זה לא נתיב שהדפדפן מכיר)
-3. הסרת m.save() - לפי API contract צריך להחזיר HTML string, לא לשמור קובץ
-4. הסרת fake_data מגוף הקובץ - הועבר ל-if __name__
-5. תיקון color_index - היה מתקדם על כל תמונה במקום רק על מכשיר חדש
-6. הוספת מקרא מכשירים
-"""
-
 import folium
+import os
+import base64
+from io import BytesIO
+from PIL import Image
+
+
+def get_base64_image(image_path, size=(150, 150)):
+    """המרת תמונה ל-Base64 כדי שתוצג ב-Popup ללא בעיות אבטחה של נתיבים"""
+    try:
+        if not image_path or not os.path.exists(image_path):
+            return None
+        with Image.open(image_path) as img:
+            img.thumbnail(size)
+            buffered = BytesIO()
+            img.save(buffered, format="JPEG")
+            return base64.b64encode(buffered.getvalue()).decode()
+    except Exception:
+        return None
 
 
 def sort_by_time(arr):
@@ -24,12 +27,6 @@ def sort_by_time(arr):
 def create_map(images_data):
     """
     יוצר מפה אינטראקטיבית עם כל המיקומים.
-
-    Args:
-        images_data: רשימת מילונים מ-extract_all
-
-    Returns:
-        string של HTML (המפה)
     """
     gps_images = [img for img in images_data if img.get("has_gps")]
 
@@ -44,12 +41,13 @@ def create_map(images_data):
         </div>
         """
 
+    # חישוב מרכז המפה
     center_lat = sum(img["latitude"] for img in gps_images) / len(gps_images)
     center_lon = sum(img["longitude"] for img in gps_images) / len(gps_images)
 
     m = folium.Map(location=[center_lat, center_lon], zoom_start=8)
 
-    # צבעים לפי מכשיר
+    # מילון הצבעים לפי מכשיר (מהקוד המקורי שלך)
     device_colors = {
         "Samsung": "blue",
         "Apple": "red",
@@ -61,42 +59,40 @@ def create_map(images_data):
         "Oppo": "cadetblue"
     }
 
-    # חלוקה לפי עם/בלי Timeline
-    with_time = [img for img in gps_images if img.get("datetime")]
-    without_time = [img for img in gps_images if not img.get("datetime")]
-
-    # יוצרים את כל הנקודות
+    # הוספת מרקרים
     for img in gps_images:
-            color = device_colors.get(img.get("camera_make"), "gray")
-            popup_text = f"{img.get('filename', '')}<br>{img.get('datetime', '')}<br>{img.get('camera_model', '')}"
+        color = device_colors.get(img.get("camera_make"), "gray")
 
-            folium.Marker(
-                location=[img["latitude"], img["longitude"]],
-                popup=popup_text,
-                icon=folium.Icon(color=color)
-            ).add_to(m)
+        # הכנת התמונה ל-Popup (משתמש ב-full_path שיצרנו ב-extractor)
+        encoded_img = get_base64_image(img.get('full_path'))
 
-    # מוסיפים PolyLine רק אם יש יותר מנקודה אחת עם Timeline
+        if encoded_img:
+            img_html = f'<img src="data:image/jpeg;base64,{encoded_img}" style="width:150px; border-radius:5px; margin-bottom:5px;">'
+        else:
+            img_html = '<div style="width:150px; height:100px; background:#ddd; border-radius:5px; display:flex; align-items:center; justify-content:center; color:#666; margin-bottom:5px;">No Image</div>'
+
+        popup_text = f"""
+        <div style="text-align: center; font-family: 'Segoe UI', sans-serif; width: 160px;">
+            {img_html}<br>
+            <b style="font-size: 14px;">{img.get('filename', '')}</b><br>
+            <span style="font-size: 12px; color: #555;">
+                {img.get('datetime', '')}<br>
+                {img.get('camera_model', '')}
+            </span>
+        </div>
+        """
+
+        folium.Marker(
+            location=[img["latitude"], img["longitude"]],
+            popup=folium.Popup(popup_text, max_width=200),
+            icon=folium.Icon(color=color)
+        ).add_to(m)
+
+    with_time = [img for img in gps_images if img.get("datetime")]
     if len(with_time) > 1:
-            sorted_images = sort_by_time(with_time)  # משתמש בפונקציה הקיימת שלך
-            line_points = [[img["latitude"], img["longitude"]] for img in sorted_images]
+        sorted_images = sort_by_time(with_time)
+        line_points = [[img["latitude"], img["longitude"]] for img in sorted_images]
 
-            folium.PolyLine(line_points, color="purple").add_to(m)
+        folium.PolyLine(line_points, color="purple", weight=3, opacity=0.7).add_to(m)
 
     return m._repr_html_()
-
-
-# if __name__ == "__main__":
-#     # תיקון: fake_data הועבר לכאן מגוף הקובץ - כדי שלא ירוץ בכל import
-#     fake_data = [
-#         {"filename": "test1.jpg", "latitude": 32.0853, "longitude": 34.7818,
-#          "has_gps": True, "camera_make": "Samsung", "camera_model": "Galaxy S23",
-#          "datetime": "2025-01-12 08:30:00"},
-#         {"filename": "test2.jpg", "latitude": 31.7683, "longitude": 35.2137,
-#          "has_gps": True, "camera_make": "Apple", "camera_model": "iPhone 15 Pro",
-#          "datetime": "2025-01-13 09:00:00"},
-#     ]
-#     html = create_map(fake_data)
-#     with open("test_map.html", "w", encoding="utf-8") as f:
-#         f.write(html)
-#     print("Map saved to test_map.html")
