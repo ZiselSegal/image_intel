@@ -25,10 +25,10 @@ def datatime(data: dict):
 
 
 def camera_make(data: dict):
-    # ניקוי תווים ריקים אם קיימים
-    make = data.get('Make', '')
+    make = data.get('Make', None)
     if isinstance(make, str):
-        return make.strip('\x00').strip()
+        if len(make.strip()) > 0:
+            return make.strip('\x00').strip()
     return None
 
 
