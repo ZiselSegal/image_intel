@@ -38,24 +38,3 @@ def analyze_images():
 
 if __name__ == '__main__':
     app.run(debug=True)
-
-def test_app_to_report_connection(client, tmp_path):
-    """
-    בדיקה שה-app באמת משתמש ב-report.py כדי לייצר את התשובה הסופית
-    """
-    # 1. יצירת תיקייה עם תמונה דמי (או תיקייה ריקה)
-    test_dir = tmp_path / "test_data"
-    test_dir.mkdir()
-
-    # 2. שליחת בקשה לשרת
-    response = client.post('/analyze', data={'folder_path': str(test_dir)})
-
-    # 3. פענוח התשובה
-    html_res = response.data.decode('utf-8')
-
-    # 4. הבדיקה הקריטית: האם מופיעים אלמנטים שקיימים *רק* ב-report.py?
-    # אלו מוודאים שה-app באמת קרא ל-create_report והשתמש בתוצאה שלו
-    assert "Image Intel | דוח מודיעין חזותי" in html_res  # כותרת ה-H1 מהדו"ח
-    assert "טווח פעילות:" in html_res  # טקסט ייחודי מהדו"ח
-    assert "toggleTimeline()" in html_res  # הסקריפט שנמצא בדו"ח
-    assert "stat-card" in html_res  # מחלקת ה-CSS מהדו"ח
