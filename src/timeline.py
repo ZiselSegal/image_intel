@@ -4,27 +4,37 @@ from map_view import sort_by_time
 def create_timeline(images_data_list):
     # 1. הגדרת משתנה ה-CSS (עיצוב) - שים לב לשימוש ב-f-string
     html_start = f"""
-    <div class="timeline-wrapper" style="font-family: Arial; max-width: 700px; margin: auto; direction: ltr;">
+    <div class="timeline-wrapper" style="font-family: 'Segoe UI', sans-serif; max-width: 700px; margin: auto; direction: rtl;">
         <style>
             .timeline-container {{ 
                 position: relative; 
-                padding-left: 30px; 
-                border-left: 3px solid #007bff; 
+                padding-right: 30px; /* שינוי לימין עבור RTL */
+                border-right: 3px solid #00d2ff; /* שינוי צבע לכחול הבהיר של הדף */
+                border-left: none;
             }}
             .event-card {{ 
-                background: white; 
+                background: rgba(255, 255, 255, 0.05); /* רקע שקוף למחצה כמו ב-section */
+                backdrop-filter: blur(10px);
                 margin-bottom: 20px; 
                 padding: 15px; 
-                border-radius: 8px; 
-                box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-                color: #333; 
+                border-radius: 15px; 
+                border: 1px solid rgba(255,255,255,0.1);
+                box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+                color: white; 
             }}
             .map-btn {{ 
-                color: white !important; 
-                background: #28a745; 
-                padding: 5px 10px; 
+                color: #0f172a !important; 
+                background: #00d2ff; 
+                padding: 8px 15px; 
                 text-decoration: none; 
-                border-radius: 4px; 
+                border-radius: 8px; 
+                font-weight: bold;
+                display: inline-block;
+                margin-top: 10px;
+            }}
+            .map-btn:hover {{
+                background: #3a7bd5;
+                color: white !important;
             }}
         </style>
         <div class="timeline-container">
