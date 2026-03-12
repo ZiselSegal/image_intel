@@ -13,7 +13,7 @@ def index():
 @app.route('/analyze', methods=['POST'])
 def analyze_images():
 
-    folder_path = request.form.get('folder_path')
+    folder_path = request.form.get('folder_path').strip().replace('"', '')
 
     if not folder_path or not os.path.isdir(folder_path):
         return "תיקייה לא נמצאה", 400
